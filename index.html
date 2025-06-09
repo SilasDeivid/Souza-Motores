@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro de Motores</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
+    h1 { text-align: center; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    input, textarea, button { width: 100%; margin-top: 10px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
+    .motor-card { background: #e9e9e9; padding: 10px; margin-top: 10px; border-radius: 5px; }
+    .search-box { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Cadastro de Motores</h1>
+
+    <input class="search-box" type="text" id="search" placeholder="Digite o modelo para buscar..." oninput="buscarMotor()">
+
+    <form id="motorForm">
+      <input type="text" id="modelo" placeholder="Modelo" required>
+      <input type="text" id="potencia" placeholder="Potência">
+      <input type="text" id="tensao" placeholder="Tensão">
+      <input type="text" id="corrente" placeholder="Corrente">
+      <input type="text" id="frequencia" placeholder="Frequência">
+      <input type="text" id="polos" placeholder="Número de Polos">
+      <input type="text" id="fabricante" placeholder="Fabricante">
+      <textarea id="obs" placeholder="Observações"></textarea>
+      <button type="submit">Salvar Motor</button>
+    </form>
+
+    <div id="listaMotores"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('motorForm');
+    const lista = document.getElementById('listaMotores');
+    const search = document.getElementById('search');
+
+    function salvarNoLocalStorage(motores) {
+      localStorage.setItem('motores', JSON.stringify(motores));
+    }
+
+    function carregarDoLocalStorage() {
+      return JSON.parse(localStorage.getItem('motores') || '[]');
+    }
+
+    function mostrarMotores(filtro = '') {
+      const motores = carregarDoLocalStorage();
+      lista.innerHTML = '';
+      motores.filter(m => m.modelo.toLowerCase().includes(filtro.toLowerCase()))
+             .forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'motor-card';
+        div.innerHTML = `<strong>Modelo:</strong> ${m.modelo}<br>
+                         <strong>Potência:</strong> ${m.potencia}<br>
+                         <strong>Tensão:</strong> ${m.tensao}<br>
+                         <strong>Corrente:</strong> ${m.corrente}<br>
+                         <strong>Frequência:</strong> ${m.frequencia}<br>
+                         <strong>Polos:</strong> ${m.polos}<br>
+                         <strong>Fabricante:</strong> ${m.fabricante}<br>
+                         <strong>Obs:</strong> ${m.obs}`;
+        lista.appendChild(div);
+      });
+    }
+
+    function buscarMotor() {
+      const filtro = search.value;
+      mostrarMotores(filtro);
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const novoMotor = {
+        modelo: form.modelo.value,
+        potencia: form.potencia.value,
+        tensao: form.tensao.value,
+        corrente: form.corrente.value,
+        frequencia: form.frequencia.value,
+        polos: form.polos.value,
+        fabricante: form.fabricante.value,
+        obs: form.obs.value,
+      };
+
+      const motores = carregarDoLocalStorage();
+      motores.push(novoMotor);
+      salvarNoLocalStorage(motores);
+      form.reset();
+      mostrarMotores();
+    });
+
+    // Carrega a lista ao iniciar
+    mostrarMotores();
+  </script>
+</body>
+</html>
